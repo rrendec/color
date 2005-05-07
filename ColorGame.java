@@ -6,10 +6,11 @@ import java.io.*;
 
 import javax.swing.ImageIcon;
 
-public class ColorGame extends Applet {
+public class ColorGame extends Applet implements KeyListener {
 	protected final static int BOARD_WIDTH = 20;
 	protected final static int BOARD_HEIGHT = 12;
 	protected final static int TILE_SIZE = 40;
+	protected final static int COLORS = 7;
 
 	protected final static int TILE_BLACK			= 0;
 	protected final static int TILE_BLUE			= 1;
@@ -54,6 +55,7 @@ public class ColorGame extends Applet {
 	};
 
 	protected int board[][] = new int[BOARD_WIDTH][BOARD_HEIGHT];
+	protected int colorCnt[] = new int[COLORS];
 	protected int mx, my;
 
 	/**
@@ -103,6 +105,26 @@ public class ColorGame extends Applet {
 		return -1;
 	}
 
+	protected static boolean isColor(int tile) {
+		return tile >= TILE_BLACK && tile <= TILE_YELLOW;
+	}
+
+	protected static boolean isWaste(int tile) {
+		return tile >= TILE_WASTE_BLACK && tile <= TILE_WASTE_YELLOW;
+	}
+
+	protected static boolean isSpace(int tile) {
+		return tile == TILE_SPACE;
+	}
+
+	protected static boolean isBackground(int tile) {
+		return tile == TILE_BACKGROUND;
+	}
+
+	protected static boolean isFinish(int tile) {
+		return tile == TILE_FINISH;
+	}
+
 	public void loadLevel(String name) {
 		name = "levels" + File.separatorChar + name;
 		String line;
@@ -110,6 +132,8 @@ public class ColorGame extends Applet {
 		for(i = 0; i < BOARD_WIDTH; i++)
 			for(j = 0; j < BOARD_HEIGHT; j++)
 				board[i][j] = TILE_SPACE;
+		for(i = 0; i < COLORS; i++)
+			colorCnt[i] = 0;
 		try {
 			BufferedReader r = new BufferedReader(new FileReader(name));
 			j = 0;
@@ -124,6 +148,8 @@ public class ColorGame extends Applet {
 						mx = i;
 						my = j;
 					}
+					if(isColor(t))
+						colorCnt[t]++;
 				}
 				j++;
 			}
@@ -133,8 +159,58 @@ public class ColorGame extends Applet {
 		}
 	}
 
+	protected boolean __doMove(int dx, int dy) {
+		int nx = mx + dx;
+		int ny = my + dy;
+		int px = nx + dx;
+		int py = ny + dy;
+
+		if(isSpace(board[nx][ny]))
+			return false;
+		do {
+			if(isBackground(board[nx][ny]) || isFinish(board[nx][ny])) {
+				// regular man movement
+				board[nx][ny] =
+					board[nx][ny] == TILE_FINISH ? TILE_MAN_FINISH : TILE_MAN;
+				break;
+			}
+			if(isColor(board[nx][ny]) && board[px][py] == board[nx][ny]) {
+				// color join
+				colorCnt[board[nx][ny]]--;
+				board[nx][ny] = TILE_MAN;
+				break;
+			}
+			if(isColor(board[nx][ny]) && isBackground(board[px][py])) {
+				// color push
+				board[px][py] = board[nx][ny];
+				board[nx][ny] = TILE_MAN;
+				break;
+			}
+			if(isColor(board[nx][ny]) && isFinish(board[px][py]) &&
+					colorCnt[board[nx][ny]] == 1) {
+				// color over finish
+				colorCnt[board[nx][ny]]--;
+				board[nx][ny] = TILE_MAN;
+				break;
+			}
+			return false;
+		} while(false);
+
+		board[mx][my] =
+			board[mx][my] == TILE_MAN ? TILE_BACKGROUND : TILE_FINISH;
+		mx = nx;
+		my = ny;
+		return true;
+	}
+
+	protected void doMove(int dx, int dy) {
+		if(__doMove(dx, dy))
+			repaint();
+	}
+
 	public void init() {
 		loadLevel("level01.txt");
+		addKeyListener(this);
 	}
 
 	public void start() {
@@ -144,6 +220,30 @@ public class ColorGame extends Applet {
 	}
 
 	public void destroy() {
+	}
+
+	public void keyTyped(KeyEvent ke) {
+	}
+
+	public void keyPressed(KeyEvent ke) {
+		System.out.println("Event " + ke);
+		switch(ke.getKeyCode()) {
+		case KeyEvent.VK_UP:
+			doMove(0, -1);
+			return;
+		case KeyEvent.VK_DOWN:
+			doMove(0, 1);
+			return;
+		case KeyEvent.VK_LEFT:
+			doMove(-1, 0);
+			return;
+		case KeyEvent.VK_RIGHT:
+			doMove(1, 0);
+			return;
+		}
+	}
+
+	public void keyReleased(KeyEvent ke) {
 	}
 
 	public void paint(Graphics g) {
