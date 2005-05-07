@@ -6,7 +6,8 @@ import java.io.*;
 
 import javax.swing.ImageIcon;
 
-public class ColorGame extends Applet implements KeyListener {
+public class ColorGame extends Applet
+implements KeyListener, MouseListener, ActionListener {
 	protected final static int BOARD_WIDTH = 20;
 	protected final static int BOARD_HEIGHT = 12;
 	protected final static int TILE_SIZE = 40;
@@ -57,6 +58,9 @@ public class ColorGame extends Applet implements KeyListener {
 	protected int board[][] = new int[BOARD_WIDTH][BOARD_HEIGHT];
 	protected int colorCnt[] = new int[COLORS];
 	protected int mx, my;
+	protected int level = 0;
+	protected boolean gameStarted = false;
+	PopupMenu popup;
 
 	/**
 	 * Translate level file character into constant.
@@ -204,13 +208,49 @@ public class ColorGame extends Applet implements KeyListener {
 	}
 
 	protected void doMove(int dx, int dy) {
-		if(__doMove(dx, dy))
-			repaint();
+		if(!gameStarted)
+			return;
+		if(!__doMove(dx, dy))
+			return;
+		repaint();
+		int sum = 0, i;
+		for(i = 0; i < COLORS; i++)
+			sum += colorCnt[i];
+		if(sum == 0)
+			nextLevel();
+	}
+
+	protected void nextLevel() {
+		level++;
+		loadLevel("level" + (level < 10 ? "0" : "") + level + ".txt");
+		gameStarted = true;
+	}
+
+	protected void initMenu() {
+		MenuItem mi;
+		Menu m;
+		int i;
+		String s;
+		
+		popup = new PopupMenu();
+		
+		m = new Menu("Select Level");
+		popup.add(m);
+		for(i = 1; i < 10; i++) {
+			mi = new MenuItem("Level " + i);
+			mi.setActionCommand("level" + (i < 10 ? "0" : "") + i);
+			mi.addActionListener(this);
+			m.add(mi);
+		}
+
+		this.add(popup);
 	}
 
 	public void init() {
-		loadLevel("level01.txt");
 		addKeyListener(this);
+		addMouseListener(this);
+		initMenu();
+		nextLevel();
 	}
 
 	public void start() {
@@ -246,6 +286,34 @@ public class ColorGame extends Applet implements KeyListener {
 	public void keyReleased(KeyEvent ke) {
 	}
 
+	public void actionPerformed(ActionEvent ae) {
+		String cmd = ae.getActionCommand();
+		if(cmd.indexOf("level") == 0) {
+			level = Integer.parseInt(cmd.substring(5));
+			loadLevel(cmd + ".txt");
+			gameStarted = true;
+			repaint();
+			return;
+		}
+	}
+
+	public void mouseClicked(MouseEvent me) {
+		if((me.getModifiers() & InputEvent.BUTTON3_MASK) != 0)
+			popup.show(this, me.getX(), me.getY());
+	}
+
+	public void mousePressed(MouseEvent me) {
+	}
+
+	public void mouseReleased(MouseEvent me) {
+	}
+
+	public void mouseEntered(MouseEvent me) {
+	}
+
+	public void mouseExited(MouseEvent me) {
+	}
+
 	public void paint(Graphics g) {
 		int i, j;
 		int dx, dy;
@@ -260,5 +328,9 @@ public class ColorGame extends Applet implements KeyListener {
 				y = dy + j * TILE_SIZE;
 				tiles[board[i][j]].paintIcon(null, g, x, y);
 			}
+	}
+
+	public void update(Graphics g) {
+		paint(g);
 	}
 }
