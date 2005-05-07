@@ -1,0 +1,164 @@
+import java.applet.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import java.io.*;
+
+import javax.swing.ImageIcon;
+
+public class ColorGame extends Applet {
+	protected final static int BOARD_WIDTH = 20;
+	protected final static int BOARD_HEIGHT = 12;
+	protected final static int TILE_SIZE = 40;
+
+	protected final static int TILE_BLACK			= 0;
+	protected final static int TILE_BLUE			= 1;
+	protected final static int TILE_GREEN			= 2;
+	protected final static int TILE_RED				= 3;
+	protected final static int TILE_VIOLET			= 4;
+	protected final static int TILE_WHITE			= 5;
+	protected final static int TILE_YELLOW			= 6;
+	protected final static int TILE_WASTE_BLACK		= 7;
+	protected final static int TILE_WASTE_BLUE		= 8;
+	protected final static int TILE_WASTE_GREEN		= 9;
+	protected final static int TILE_WASTE_RED		= 10;
+	protected final static int TILE_WASTE_VIOLET	= 11;
+	protected final static int TILE_WASTE_WHITE		= 12;
+	protected final static int TILE_WASTE_YELLOW	= 13;
+	protected final static int TILE_SPACE			= 14;
+	protected final static int TILE_BACKGROUND		= 15;
+	protected final static int TILE_MAN				= 16;
+	protected final static int TILE_FINISH			= 17;
+	protected final static int TILE_MAN_FINISH		= 18;
+
+	protected static ImageIcon[] tiles = new ImageIcon[] {
+		new ImageIcon("tiles/black.png"),
+		new ImageIcon("tiles/blue.png"),
+		new ImageIcon("tiles/green.png"),
+		new ImageIcon("tiles/red.png"),
+		new ImageIcon("tiles/violet.png"),
+		new ImageIcon("tiles/white.png"),
+		new ImageIcon("tiles/yellow.png"),
+		new ImageIcon("tiles/waste_black.png"),
+		new ImageIcon("tiles/waste_blue.png"),
+		new ImageIcon("tiles/waste_green.png"),
+		new ImageIcon("tiles/waste_red.png"),
+		new ImageIcon("tiles/waste_violet.png"),
+		new ImageIcon("tiles/waste_white.png"),
+		new ImageIcon("tiles/waste_yellow.png"),
+		new ImageIcon("tiles/space.png"),
+		new ImageIcon("tiles/background.png"),
+		new ImageIcon("tiles/man.png"),
+		new ImageIcon("tiles/finish.png"),
+		new ImageIcon("tiles/man_finish.png")
+	};
+
+	protected int board[][] = new int[BOARD_WIDTH][BOARD_HEIGHT];
+	protected int mx, my;
+
+	/**
+	 * Translate level file character into constant.
+	 */
+	protected static int xlateChar(char c) {
+		switch(c) {
+		case 'B':
+			return TILE_BLACK;
+		case 'U':
+			return TILE_BLUE;
+		case 'G':
+			return TILE_GREEN;
+		case 'R':
+			return TILE_RED;
+		case 'V':
+			return TILE_VIOLET;
+		case 'W':
+			return TILE_WHITE;
+		case 'Y':
+			return TILE_YELLOW;
+		case 'b':
+			return TILE_WASTE_BLACK;
+		case 'u':
+			return TILE_WASTE_BLUE;
+		case 'g':
+			return TILE_WASTE_GREEN;
+		case 'r':
+			return TILE_WASTE_RED;
+		case 'v':
+			return TILE_WASTE_VIOLET;
+		case 'w':
+			return TILE_WASTE_WHITE;
+		case 'y':
+			return TILE_WASTE_YELLOW;
+		case '#':
+			return TILE_SPACE;
+		case ' ':
+			return TILE_BACKGROUND;
+		case 'M':
+			return TILE_MAN;
+		case 'F':
+			return TILE_FINISH;
+		case 'X':
+			return TILE_MAN_FINISH;
+		}
+		return -1;
+	}
+
+	public void loadLevel(String name) {
+		name = "levels" + File.separatorChar + name;
+		String line;
+		int i = 0, j, t;
+		for(i = 0; i < BOARD_WIDTH; i++)
+			for(j = 0; j < BOARD_HEIGHT; j++)
+				board[i][j] = TILE_SPACE;
+		try {
+			BufferedReader r = new BufferedReader(new FileReader(name));
+			j = 0;
+			while((line = r.readLine()) != null && j < BOARD_HEIGHT) {
+				if(line.length() < BOARD_WIDTH)
+					continue;
+				for(i = 0; i < BOARD_WIDTH; i++) {
+					if((t = xlateChar(line.charAt(i))) == -1)
+						break;
+					board[i][j] = t;
+					if(t == TILE_MAN || t == TILE_MAN_FINISH) {
+						mx = i;
+						my = j;
+					}
+				}
+				j++;
+			}
+			r.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void init() {
+		loadLevel("level01.txt");
+	}
+
+	public void start() {
+	}
+
+	public void stop() {
+	}
+
+	public void destroy() {
+	}
+
+	public void paint(Graphics g) {
+		int i, j;
+		int dx, dy;
+		int x, y;
+
+		dx = (getWidth() - TILE_SIZE * BOARD_WIDTH) / 2;
+		dy = (getHeight() - TILE_SIZE * BOARD_HEIGHT) / 2;
+
+		for(i = 0; i < BOARD_WIDTH; i++)
+			for(j = 0; j < BOARD_HEIGHT; j++) {
+				x = dx + i * TILE_SIZE;
+				y = dy + j * TILE_SIZE;
+				tiles[board[i][j]].paintIcon(null, g, x, y);
+			}
+	}
+}
