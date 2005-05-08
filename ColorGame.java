@@ -158,6 +158,7 @@ implements KeyListener, MouseListener, ActionListener {
 				j++;
 			}
 			r.close();
+			gameStarted = true;
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -197,6 +198,17 @@ implements KeyListener, MouseListener, ActionListener {
 				board[nx][ny] = TILE_MAN;
 				break;
 			}
+			if(isWaste(board[nx][ny]) && isBackground(board[px][py])) {
+				// push waste
+				board[px][py] = board[nx][ny];
+				board[nx][ny] = TILE_MAN;
+				break;
+			}
+			if(isWaste(board[nx][ny]) && isSpace(board[px][py])) {
+				// throw away waste
+				board[nx][ny] = TILE_MAN;
+				break;
+			}
 			return false;
 		} while(false);
 
@@ -216,40 +228,52 @@ implements KeyListener, MouseListener, ActionListener {
 		int sum = 0, i;
 		for(i = 0; i < COLORS; i++)
 			sum += colorCnt[i];
-		if(sum == 0)
-			nextLevel();
+		if(sum == 0) {
+			//FIXME Status bar <= "Press space for next level"
+			gameStarted = false;
+		}
 	}
 
 	protected void nextLevel() {
 		level++;
 		loadLevel("level" + (level < 10 ? "0" : "") + level + ".txt");
-		gameStarted = true;
 	}
 
 	protected void initMenu() {
 		MenuItem mi;
-		Menu m;
-		int i;
+		Menu m1, m2;
+		int i, j;
 		String s;
 		
 		popup = new PopupMenu();
 		
-		m = new Menu("Select Level");
-		popup.add(m);
-		for(i = 1; i < 10; i++) {
-			mi = new MenuItem("Level " + i);
-			mi.setActionCommand("level" + (i < 10 ? "0" : "") + i);
-			mi.addActionListener(this);
-			m.add(mi);
+		m1 = new Menu("Select Level");
+		popup.add(m1);
+		for(i = 0; i < 10; i++) {
+			m2 = new Menu("Levels " + (i == 0 ? 1 : 10 * i) +
+					"-" + (10 * i + 9));
+			for(j = (i == 0 ? 1 : 10 * i); j < 10 * (i + 1); j++) {
+				mi = new MenuItem("Level " + j);
+				mi.setActionCommand("level" + (j < 10 ? "0" : "") + j);
+				mi.addActionListener(this);
+				m2.add(mi);
+			}
+			m1.add(m2);
 		}
 
 		this.add(popup);
 	}
 
 	public void init() {
+		int i, j;
 		addKeyListener(this);
 		addMouseListener(this);
 		initMenu();
+		/*
+		for(i = 0; i < BOARD_WIDTH; i++)
+			for(j = 0; j < BOARD_HEIGHT; j++)
+				board[i][j] = TILE_SPACE;
+		*/
 		nextLevel();
 	}
 
@@ -266,19 +290,33 @@ implements KeyListener, MouseListener, ActionListener {
 	}
 
 	public void keyPressed(KeyEvent ke) {
-		System.out.println("Event " + ke);
-		switch(ke.getKeyCode()) {
-		case KeyEvent.VK_UP:
+		//System.out.println("Event " + ke);
+		int code = ke.getKeyCode();
+		if(code == KeyEvent.VK_UP && gameStarted) {
 			doMove(0, -1);
 			return;
-		case KeyEvent.VK_DOWN:
+		}
+		if(code == KeyEvent.VK_DOWN && gameStarted) {
 			doMove(0, 1);
 			return;
-		case KeyEvent.VK_LEFT:
+		}
+		if(code == KeyEvent.VK_LEFT && gameStarted) {
 			doMove(-1, 0);
 			return;
-		case KeyEvent.VK_RIGHT:
+		}
+		if(code == KeyEvent.VK_RIGHT && gameStarted) {
 			doMove(1, 0);
+			return;
+		}
+		if(code == KeyEvent.VK_SPACE && !gameStarted) {
+			nextLevel();
+			repaint();
+			return;
+		}
+		if(code == KeyEvent.VK_ESCAPE && gameStarted) {
+			level--;
+			nextLevel();
+			repaint();
 			return;
 		}
 	}
