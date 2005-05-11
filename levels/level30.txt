@@ -1,0 +1,12 @@
+####################
+#                  #
+#rr    R           #
+#rr# # # rr# # # #r#
+#rrrrrrrr rrrrrrrrr#
+#rrr r r r r   r rr#
+#rrr r r r r rrr rr#
+#rrrrrrrrrr#rrrrrrr#
+#          rr      #
+#    X             #
+#                  #
+####################

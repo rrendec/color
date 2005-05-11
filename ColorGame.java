@@ -60,7 +60,9 @@ implements KeyListener, MouseListener, ActionListener {
 	protected int mx, my;
 	protected int level = 0;
 	protected boolean gameStarted = false;
-	PopupMenu popup;
+	protected PopupMenu popup;
+	protected Vector undoStack = new Vector();
+	protected int undoLevel = 0;
 
 	/**
 	 * Translate level file character into constant.
@@ -158,20 +160,31 @@ implements KeyListener, MouseListener, ActionListener {
 				j++;
 			}
 			r.close();
+			undoStack.clear();
+			undoLevel = 0;
 			gameStarted = true;
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	protected boolean __doMove(int dx, int dy) {
+	protected UndoMove __doMove(int dx, int dy) {
+		UndoMove u = new UndoMove();
+		u.mx = mx;
+		u.my = my;
+		u.dx = dx;
+		u.dy = dy;
 		int nx = mx + dx;
 		int ny = my + dy;
 		int px = nx + dx;
 		int py = ny + dy;
+		u.tile_m = board[mx][my];
+		u.tile_n = board[nx][ny];
+		u.tile_p = board[px][py];
+		u.incCnt = false;
 
 		if(isSpace(board[nx][ny]))
-			return false;
+			return null;
 		do {
 			if(isBackground(board[nx][ny]) || isFinish(board[nx][ny])) {
 				// regular man movement
@@ -183,6 +196,7 @@ implements KeyListener, MouseListener, ActionListener {
 				// color join
 				colorCnt[board[nx][ny]]--;
 				board[nx][ny] = TILE_MAN;
+				u.incCnt = true;
 				break;
 			}
 			if(isColor(board[nx][ny]) && isBackground(board[px][py])) {
@@ -196,6 +210,7 @@ implements KeyListener, MouseListener, ActionListener {
 				// color over finish
 				colorCnt[board[nx][ny]]--;
 				board[nx][ny] = TILE_MAN;
+				u.incCnt = true;
 				break;
 			}
 			if(isWaste(board[nx][ny]) && isBackground(board[px][py])) {
@@ -209,21 +224,24 @@ implements KeyListener, MouseListener, ActionListener {
 				board[nx][ny] = TILE_MAN;
 				break;
 			}
-			return false;
+			return null;
 		} while(false);
 
 		board[mx][my] =
 			board[mx][my] == TILE_MAN ? TILE_BACKGROUND : TILE_FINISH;
 		mx = nx;
 		my = ny;
-		return true;
+		return u;
 	}
 
 	protected void doMove(int dx, int dy) {
+		UndoMove u;
 		if(!gameStarted)
 			return;
-		if(!__doMove(dx, dy))
+		if((u = __doMove(dx, dy)) == null)
 			return;
+		undoStack.setSize(undoLevel + 1);
+		undoStack.set(undoLevel++, u);
 		repaint();
 		int sum = 0, i;
 		for(i = 0; i < COLORS; i++)
@@ -232,6 +250,37 @@ implements KeyListener, MouseListener, ActionListener {
 			//FIXME Status bar <= "Press space for next level"
 			gameStarted = false;
 		}
+	}
+
+	protected void undoMove() {
+		if(!gameStarted)
+			return;
+		if(undoLevel == 0)
+			return;
+		UndoMove u = (UndoMove)undoStack.elementAt(--undoLevel);
+		mx = u.mx;
+		my = u.my;
+		int nx = mx + u.dx;
+		int ny = my + u.dy;
+		int px = nx + u.dx;
+		int py = ny + u.dy;
+		board[mx][my] = u.tile_m;
+		board[nx][ny] = u.tile_n;
+		board[px][py] = u.tile_p;
+		if(u.incCnt)
+			colorCnt[u.tile_n]++;
+		repaint();
+	}
+
+	protected void redoMove() {
+		UndoMove u;
+		if(!gameStarted)
+			return;
+		if(undoLevel == undoStack.size())
+			return;
+		u = (UndoMove)undoStack.elementAt(undoLevel++);
+		__doMove(u.dx, u.dy);
+		repaint();
 	}
 
 	protected void nextLevel() {
@@ -292,19 +341,19 @@ implements KeyListener, MouseListener, ActionListener {
 	public void keyPressed(KeyEvent ke) {
 		//System.out.println("Event " + ke);
 		int code = ke.getKeyCode();
-		if(code == KeyEvent.VK_UP && gameStarted) {
+		if(code == KeyEvent.VK_UP) {
 			doMove(0, -1);
 			return;
 		}
-		if(code == KeyEvent.VK_DOWN && gameStarted) {
+		if(code == KeyEvent.VK_DOWN) {
 			doMove(0, 1);
 			return;
 		}
-		if(code == KeyEvent.VK_LEFT && gameStarted) {
+		if(code == KeyEvent.VK_LEFT) {
 			doMove(-1, 0);
 			return;
 		}
-		if(code == KeyEvent.VK_RIGHT && gameStarted) {
+		if(code == KeyEvent.VK_RIGHT) {
 			doMove(1, 0);
 			return;
 		}
@@ -317,6 +366,14 @@ implements KeyListener, MouseListener, ActionListener {
 			level--;
 			nextLevel();
 			repaint();
+			return;
+		}
+		if(code == KeyEvent.VK_U || code == KeyEvent.VK_BACK_SPACE) {
+			undoMove();
+			return;
+		}
+		if(code == KeyEvent.VK_R) {
+			redoMove();
 			return;
 		}
 	}
@@ -371,4 +428,13 @@ implements KeyListener, MouseListener, ActionListener {
 	public void update(Graphics g) {
 		paint(g);
 	}
+}
+
+class UndoMove {
+	public int mx, my;
+	public int dx, dy;
+	public int tile_m;
+	public int tile_n;
+	public int tile_p;
+	public boolean incCnt;
 }

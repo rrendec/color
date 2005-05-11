@@ -1,0 +1,12 @@
+####################
+#  #################
+#   vv G U V G U V #
+#   #  G U V G U V #
+#   #  G U V G U V #
+# X #  G U V G U V #
+#vvv#  G U V G U V #
+#   #  G U V G U v #
+#vvv#  G U V G U V #
+#  vv  G U V G U V #
+#vv#################
+####################

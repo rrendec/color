@@ -1,0 +1,20 @@
+case 'B': TILE_BLACK;
+case 'U': TILE_BLUE;
+case 'G': TILE_GREEN;
+case 'R': TILE_RED;
+case 'V': TILE_VIOLET;
+case 'W': TILE_WHITE;
+case 'Y': TILE_YELLOW;
+
+case 'b': TILE_WASTE_BLACK;
+case 'u': TILE_WASTE_BLUE;
+case 'g': TILE_WASTE_GREEN;
+case 'r': TILE_WASTE_RED;
+case 'v': TILE_WASTE_VIOLET;
+case 'w': TILE_WASTE_WHITE;
+case 'y': TILE_WASTE_YELLOW;
+case '#':TILE_SPACE;
+case ' ': TILE_BACKGROUND;
+case 'M': TILE_MAN;
+case 'F': TILE_FINISH;
+case 'X': TILE_MAN_FINISH; 
