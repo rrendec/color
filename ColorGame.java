@@ -180,7 +180,6 @@ implements KeyListener, MouseListener, ActionListener {
 		int py = ny + dy;
 		u.tile_m = board[mx][my];
 		u.tile_n = board[nx][ny];
-		u.tile_p = board[px][py];
 		u.incCnt = false;
 
 		if(isSpace(board[nx][ny]))
@@ -188,12 +187,14 @@ implements KeyListener, MouseListener, ActionListener {
 		do {
 			if(isBackground(board[nx][ny]) || isFinish(board[nx][ny])) {
 				// regular man movement
+				u.tile_p = board[px][py];
 				board[nx][ny] =
 					board[nx][ny] == TILE_FINISH ? TILE_MAN_FINISH : TILE_MAN;
 				break;
 			}
 			if(isColor(board[nx][ny]) && board[px][py] == board[nx][ny]) {
 				// color join
+				u.tile_p = board[px][py];
 				colorCnt[board[nx][ny]]--;
 				board[nx][ny] = TILE_MAN;
 				u.incCnt = true;
@@ -201,6 +202,7 @@ implements KeyListener, MouseListener, ActionListener {
 			}
 			if(isColor(board[nx][ny]) && isBackground(board[px][py])) {
 				// color push
+				u.tile_p = board[px][py];
 				board[px][py] = board[nx][ny];
 				board[nx][ny] = TILE_MAN;
 				break;
@@ -208,6 +210,7 @@ implements KeyListener, MouseListener, ActionListener {
 			if(isColor(board[nx][ny]) && isFinish(board[px][py]) &&
 					colorCnt[board[nx][ny]] == 1) {
 				// color over finish
+				u.tile_p = board[px][py];
 				colorCnt[board[nx][ny]]--;
 				board[nx][ny] = TILE_MAN;
 				u.incCnt = true;
@@ -215,12 +218,14 @@ implements KeyListener, MouseListener, ActionListener {
 			}
 			if(isWaste(board[nx][ny]) && isBackground(board[px][py])) {
 				// push waste
+				u.tile_p = board[px][py];
 				board[px][py] = board[nx][ny];
 				board[nx][ny] = TILE_MAN;
 				break;
 			}
 			if(isWaste(board[nx][ny]) && isSpace(board[px][py])) {
 				// throw away waste
+				u.tile_p = board[px][py];
 				board[nx][ny] = TILE_MAN;
 				break;
 			}
