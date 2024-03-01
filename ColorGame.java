@@ -300,17 +300,16 @@ implements KeyListener, MouseListener, ActionListener {
 		Menu m1, m2;
 		int i, j;
 		String s;
-		
+
 		popup = new PopupMenu();
-		
+
 		m1 = new Menu("Select Level");
 		popup.add(m1);
-		for(i = 0; i < 10; i++) {
-			m2 = new Menu("Levels " + (i == 0 ? 1 : 10 * i) +
-					"-" + (10 * i + 9));
-			for(j = (i == 0 ? 1 : 10 * i); j < 10 * (i + 1); j++) {
+		for (i = 1; i < 50; i += 10) {
+			m2 = new Menu("Levels " + i + "-" + (i + 9));
+			for (j = i; j < i + 10; j++) {
 				mi = new MenuItem("Level " + j);
-				mi.setActionCommand("level" + (j < 10 ? "0" : "") + j);
+				mi.setActionCommand(String.format("level%02d", j));
 				mi.addActionListener(this);
 				m2.add(mi);
 			}
