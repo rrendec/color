@@ -6,7 +6,7 @@
 #rrr r r r r   r rr#
 #rrr r r r r rrr rr#
 #rrrrrrrrrr#rrrrrrr#
-#          rr      #
+#           rr     #
 #    X             #
 #                  #
 ####################
