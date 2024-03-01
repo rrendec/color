@@ -13,6 +13,8 @@ implements KeyListener, MouseListener, ActionListener {
 	protected final static int TILE_SIZE = 40;
 	protected final static int COLORS = 7;
 
+	protected final static boolean DEBUG_RULER = false;
+
 	protected final static int TILE_BLACK			= 0;
 	protected final static int TILE_BLUE			= 1;
 	protected final static int TILE_GREEN			= 2;
@@ -428,6 +430,16 @@ implements KeyListener, MouseListener, ActionListener {
 				y = dy + j * TILE_SIZE;
 				tiles[board[i][j]].paintIcon(null, g, x, y);
 			}
+
+		if (DEBUG_RULER) {
+			g.setColor(new Color(255, 255, 255));
+			g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
+
+			for (i = 1; i < BOARD_WIDTH; i++)
+				g.drawString(String.format("%02d", i + 1), dx + 3 + TILE_SIZE * i, dy + 32);
+			for (i = 1; i < BOARD_HEIGHT; i++)
+				g.drawString(String.format("%02d", i + 1), dx + 3, dy + 32 + TILE_SIZE * i);
+		}
 	}
 
 	public void update(Graphics g) {
