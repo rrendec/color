@@ -12,6 +12,7 @@ implements KeyListener, MouseListener, ActionListener {
 	protected final static int BOARD_HEIGHT = 12;
 	protected final static int TILE_SIZE = 40;
 	protected final static int COLORS = 7;
+	protected final static int LEVELS = 50;
 
 	protected final static boolean DEBUG_RULER = false;
 
@@ -305,7 +306,7 @@ implements KeyListener, MouseListener, ActionListener {
 
 		m1 = new Menu("Select Level");
 		popup.add(m1);
-		for (i = 1; i < 50; i += 10) {
+		for (i = 1; i < LEVELS; i += 10) {
 			m2 = new Menu("Levels " + i + "-" + (i + 9));
 			for (j = i; j < i + 10; j++) {
 				mi = new MenuItem("Level " + j);
@@ -363,7 +364,7 @@ implements KeyListener, MouseListener, ActionListener {
 			doMove(1, 0);
 			return;
 		}
-		if(code == KeyEvent.VK_SPACE && !gameStarted) {
+		if (code == KeyEvent.VK_SPACE && !gameStarted && level < LEVELS) {
 			nextLevel();
 			repaint();
 			return;
