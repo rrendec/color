@@ -1,0 +1,12 @@
+####################
+#     r          r #
+#  WB B G gWgBgRgGr#
+# BRR  V  W B R G  #
+#ww WWV  W B R G U #
+# wRrU  W B R G U r#
+#w   b W B R G U V #
+#r B  W B R G U V b#
+# W  W B R G U V Y #
+#Y  W B R G U V Y g#
+#X W B R G U V y   #
+####################
