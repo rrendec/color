@@ -325,11 +325,6 @@ implements KeyListener, MouseListener, ActionListener {
 		addKeyListener(this);
 		addMouseListener(this);
 		initMenu();
-		/*
-		for(i = 0; i < BOARD_WIDTH; i++)
-			for(j = 0; j < BOARD_HEIGHT; j++)
-				board[i][j] = TILE_SPACE;
-		*/
 		nextLevel();
 	}
 
@@ -346,7 +341,6 @@ implements KeyListener, MouseListener, ActionListener {
 	}
 
 	public void keyPressed(KeyEvent ke) {
-		//System.out.println("Event " + ke);
 		int code = ke.getKeyCode();
 		if(code == KeyEvent.VK_UP) {
 			doMove(0, -1);
