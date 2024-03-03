@@ -62,10 +62,10 @@ implements KeyListener, MouseListener, ActionListener {
 	protected int colorCnt[] = new int[COLORS];
 	protected int mx, my;
 	protected int level = 0;
-	protected boolean gameStarted = false;
+	protected boolean gameOver;
 	protected PopupMenu popup;
 	protected Vector undoStack = new Vector();
-	protected int undoLevel = 0;
+	protected int moves = 0;
 
 	/**
 	 * Translate level file character into constant.
@@ -164,8 +164,8 @@ implements KeyListener, MouseListener, ActionListener {
 			}
 			r.close();
 			undoStack.clear();
-			undoLevel = 0;
-			gameStarted = true;
+			moves = 0;
+			gameOver = false;
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -244,28 +244,28 @@ implements KeyListener, MouseListener, ActionListener {
 
 	protected void doMove(int dx, int dy) {
 		UndoMove u;
-		if(!gameStarted)
+		if (gameOver)
 			return;
 		if((u = __doMove(dx, dy)) == null)
 			return;
-		undoStack.setSize(undoLevel + 1);
-		undoStack.set(undoLevel++, u);
+		undoStack.setSize(moves + 1);
+		undoStack.set(moves++, u);
 		repaint();
 		int sum = 0, i;
 		for(i = 0; i < COLORS; i++)
 			sum += colorCnt[i];
 		if(sum == 0) {
 			//FIXME Status bar <= "Press space for next level"
-			gameStarted = false;
+			gameOver = true;
 		}
 	}
 
 	protected void undoMove() {
-		if(!gameStarted)
+		if (gameOver)
 			return;
-		if(undoLevel == 0)
+		if (moves == 0)
 			return;
-		UndoMove u = (UndoMove)undoStack.elementAt(--undoLevel);
+		UndoMove u = (UndoMove)undoStack.elementAt(--moves);
 		mx = u.mx;
 		my = u.my;
 		int nx = mx + u.dx;
@@ -282,11 +282,11 @@ implements KeyListener, MouseListener, ActionListener {
 
 	protected void redoMove() {
 		UndoMove u;
-		if(!gameStarted)
+		if (gameOver)
 			return;
-		if(undoLevel == undoStack.size())
+		if (moves == undoStack.size())
 			return;
-		u = (UndoMove)undoStack.elementAt(undoLevel++);
+		u = (UndoMove)undoStack.elementAt(moves++);
 		__doMove(u.dx, u.dy);
 		repaint();
 	}
@@ -358,12 +358,12 @@ implements KeyListener, MouseListener, ActionListener {
 			doMove(1, 0);
 			return;
 		}
-		if (code == KeyEvent.VK_SPACE && !gameStarted && level < LEVELS) {
+		if (code == KeyEvent.VK_SPACE && gameOver && level < LEVELS) {
 			nextLevel();
 			repaint();
 			return;
 		}
-		if(code == KeyEvent.VK_ESCAPE && gameStarted) {
+		if(code == KeyEvent.VK_ESCAPE && !gameOver) {
 			level--;
 			nextLevel();
 			repaint();
@@ -387,7 +387,7 @@ implements KeyListener, MouseListener, ActionListener {
 		if(cmd.indexOf("level") == 0) {
 			level = Integer.parseInt(cmd.substring(5));
 			loadLevel(cmd + ".txt");
-			gameStarted = true;
+			gameOver = false;
 			repaint();
 			return;
 		}
