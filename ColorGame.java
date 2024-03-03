@@ -250,14 +250,12 @@ implements KeyListener, MouseListener, ActionListener {
 			return;
 		undoStack.setSize(moves + 1);
 		undoStack.set(moves++, u);
-		repaint();
 		int sum = 0, i;
 		for(i = 0; i < COLORS; i++)
 			sum += colorCnt[i];
-		if(sum == 0) {
-			//FIXME Status bar <= "Press space for next level"
+		if (sum == 0)
 			gameOver = true;
-		}
+		repaint();
 	}
 
 	protected void undoMove() {
@@ -434,6 +432,21 @@ implements KeyListener, MouseListener, ActionListener {
 			for (i = 1; i < BOARD_HEIGHT; i++)
 				g.drawString(String.format("%02d", i + 1), dx + 3, dy + 32 + TILE_SIZE * i);
 		}
+
+		/*
+		 * Update status inside the paint() method to include the case when the
+		 * applet is started. By default, the applet framework sets the status
+		 * to "Applet started" *after* it calls the init() and start() methods.
+		 * The paint() method is called automatically on applet startup, and at
+		 * that point we have a chance to overwrite the default status.
+		 */
+		String message = String.format("Level: %d | Moves: %d", level, moves);
+		if (gameOver) {
+			message += " | Game over";
+			if (level < LEVELS)
+				message += " - press Space for next level";
+		}
+		showStatus(message);
 	}
 
 	public void update(Graphics g) {
